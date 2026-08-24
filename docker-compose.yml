@@ -1,0 +1,39 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Build-time — next build inlines these into the client bundle.
+        # http://localhost:8010 is correct here (not the internal
+        # "backend" service hostname): NEXT_PUBLIC_API_BASE_URL is read by
+        # browser JS running on the host, which reaches the backend through
+        # its published port, not through the compose network.
+        # Host ports 3010/8010 (not 3000/8000) because 3000 and 8000 are
+        # already occupied by unrelated processes on this machine.
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8010/api/v1
+    ports:
+      - "3010:3000"
+    environment:
+      # Runtime — read by server-side code (middleware.ts, lib/supabase/server.ts)
+      # on every request; independent of the build-time args above.
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8010/api/v1
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8010:8000"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - CORS_ORIGINS=http://localhost:3010
+    restart: unless-stopped

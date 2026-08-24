@@ -1,0 +1,26 @@
+# Backend (Python)
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.env
+backend/*.egg-info/
+backend/.pytest_cache/
+
+# Frontend (Node/Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/.env*.local
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Docker Compose env (real secrets — see .env.example)
+/.env
+
+# OS/editor
+.DS_Store
+*.log
+
+# Claude Code local session state
+.claude/
