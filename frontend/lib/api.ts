@@ -27,10 +27,19 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    throw new ApiError(
-      response.status,
-      body?.error?.message ?? "Terjadi kesalahan tak terduga."
-    );
+    
+    let errorMessage = "Terjadi kesalahan tak terduga.";
+    if (body?.detail) {
+      errorMessage = typeof body.detail === 'string' 
+        ? body.detail 
+        : Array.isArray(body.detail) 
+          ? body.detail.map((e: any) => e.msg).join(', ') 
+          : JSON.stringify(body.detail);
+    } else if (body?.error?.message) {
+      errorMessage = body.error.message;
+    }
+
+    throw new ApiError(response.status, errorMessage);
   }
 
   if (response.status === 204) {
@@ -52,10 +61,19 @@ async function postFormData<T>(path: string, formData: FormData): Promise<T> {
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    throw new ApiError(
-      response.status,
-      body?.error?.message ?? "Terjadi kesalahan tak terduga."
-    );
+    
+    let errorMessage = "Terjadi kesalahan tak terduga.";
+    if (body?.detail) {
+      errorMessage = typeof body.detail === 'string' 
+        ? body.detail 
+        : Array.isArray(body.detail) 
+          ? body.detail.map((e: any) => e.msg).join(', ') 
+          : JSON.stringify(body.detail);
+    } else if (body?.error?.message) {
+      errorMessage = body.error.message;
+    }
+
+    throw new ApiError(response.status, errorMessage);
   }
   return response.json();
 }
