@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { dashboardPathForRole, type UserRole } from "@/lib/types";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const linkInvalid = searchParams.get("error") === "link_tidak_valid";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +44,12 @@ export default function LoginPage() {
 
   return (
     <div>
+      {linkInvalid && (
+        <p className="mb-4 text-sm text-red-600">
+          Tautan konfirmasi tidak valid atau sudah kedaluwarsa. Silakan daftar ulang atau minta
+          tautan baru.
+        </p>
+      )}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label htmlFor="email" className="mb-1 block text-sm font-medium text-iron">
@@ -89,5 +97,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }
